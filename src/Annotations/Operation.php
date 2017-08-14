@@ -158,8 +158,8 @@ abstract class Operation extends AbstractAnnotation
         $valid = parent::validate($parents, $skip);
         if ($this->responses !== null) {
             foreach ($this->responses as $response) {
-                if ($response->response !== 'default' && preg_match('/^[12345]{1}[0-9]{2}$/', $response->response) === 0) {
-                    Logger::notice('Invalid value "' . $response->response . '" for ' . $response->_identity([]) . '->response, expecting "default" or a HTTP Status Code in ' . $response->_context);
+                if ($response->response !== 'default' && preg_match('/^[12345]{1}[0-9]{2}$/', $response->response) === 0 && (strpos($response->response, '$') === false)) {
+                    Logger::notice('Invalid value "' . $response->response . '" for ' . $response->_identity([]) . '->response, expecting "default" or a HTTP Status Code or $linkName in ' . $response->_context);
                 }
             }
         }

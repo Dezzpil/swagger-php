@@ -30,7 +30,7 @@ class HandleReferences
     {
         $this->getAllImports($analysis);
         $this->mapReferences();
-        $this->importReferences();
+        $this->importReferences($analysis);
     }
 
     /**
@@ -89,9 +89,10 @@ class HandleReferences
     {
         if (!is_null($operation->responses)) {
             foreach ($operation->responses as $item) {
-                if ($this->checkSyntax($item->ref)) {
-                    $this->references[$this->import_in_order['response']][] = $this->link($item);
-                }
+//                if ($this->checkSyntax($item->ref)) {
+//                    $this->references[$this->import_in_order['response']][] = $this->link($item);
+//                }
+                $this->references[$this->import_in_order['response']][$item->response] = $this->link($item);
             }
         }
     }
@@ -176,7 +177,7 @@ class HandleReferences
                 $item = $data[1];
 
 
-                if (!isset($item->ref)) {
+                if (!isset($item->ref) || empty($item->ref)) {
                     $this->head_references[$import_name][] = &$data;
                 } elseif ($this->checkSyntax($item->ref)) {
                     $params = explode("/", $item->ref);
@@ -218,7 +219,7 @@ class HandleReferences
     /**
      * Imports the references from all of the responses
      */
-    private function importReferences()
+    private function importReferences(Analysis $analysis)
     {
         foreach ($this->import_in_order as $key => $import_name) {
             //get the list to import from
@@ -227,6 +228,12 @@ class HandleReferences
             //while has items in the queue
             while (count($queue)) {
                 $this->iterateQueue($queue, $key);
+            }
+
+            // import, copy to swagger object
+            $analysis->swagger->$import_name = [];
+            foreach ($this->references[$import_name] as $item) {
+                $analysis->swagger->$import_name[] = $item[1];
             }
         }
     }
